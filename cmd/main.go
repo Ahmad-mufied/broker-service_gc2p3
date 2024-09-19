@@ -27,7 +27,8 @@ func main() {
 
 	systemRoots, err := x509.SystemCertPool()
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		log.Printf("Failed to read system root CA: %v", err)
 	}
 	cred := credentials.NewTLS(&tls.Config{
 		RootCAs: systemRoots,
@@ -35,7 +36,8 @@ func main() {
 
 	userServiceDial, err := grpc.Dial(userAddr, grpc.WithAuthority(userServiceAddress), grpc.WithTransportCredentials(cred))
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		log.Printf("Failed to dial user service: %v", err)
 	}
 
 	bookServiceDial, err := grpc.Dial(bokAddr, grpc.WithAuthority(bookServiceAddress), grpc.WithTransportCredentials(cred))
@@ -46,7 +48,8 @@ func main() {
 	userServiceAuth := client.NewAuthClient(userServiceDial, config.Viper.GetString("USER_SERVICE_NAME"), userServicePassword)
 	userServiceInterceptor, err := client.NewAuthInterceptor(userServiceAuth, client.AuthMethods(), refreshDuration)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		log.Printf("Failed to create user service interceptor: %v", err)
 	}
 
 	//userServiceDial2, err := grpc.Dial(
@@ -65,7 +68,8 @@ func main() {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		log.Printf("Failed to dial user service: %v", err)
 	}
 
 	userServiceClient := pb.NewAuthUserServiceClient(userServiceDial2)
