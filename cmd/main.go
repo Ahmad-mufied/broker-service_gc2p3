@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"github.com/Ahmad-mufied/broker-service_gc2p3/config"
 	"github.com/Ahmad-mufied/broker-service_gc2p3/gRPC/client"
@@ -10,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"log"
 )
 
@@ -19,12 +22,23 @@ func main() {
 	userServiceAddress := config.Viper.GetString("USER_SERVICE_ADDRESS")
 	bookServiceAddress := config.Viper.GetString("BOOK_SERVICE_ADDRESS")
 
-	userServiceDial, err := grpc.Dial(userServiceAddress, grpc.WithInsecure())
+	userAddr := userServiceAddress + ":443"
+	bokAddr := bookServiceAddress + ":443"
+
+	systemRoots, err := x509.SystemCertPool()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cred := credentials.NewTLS(&tls.Config{
+		RootCAs: systemRoots,
+	})
+
+	userServiceDial, err := grpc.Dial(userAddr, grpc.WithAuthority(userServiceAddress), grpc.WithTransportCredentials(cred))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bookServiceDial, err := grpc.Dial(bookServiceAddress, grpc.WithInsecure())
+	bookServiceDial, err := grpc.Dial(bokAddr, grpc.WithAuthority(bookServiceAddress), grpc.WithTransportCredentials(cred))
 
 	userServicePassword := config.Viper.GetString("USER_SERVICE_PASSWORD")
 	refreshDuration := config.Viper.GetDuration("USER_SERVICE_REFRESH_DURATION")
@@ -35,9 +49,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	//userServiceDial2, err := grpc.Dial(
+	//	userServiceAddress,
+	//	grpc.WithInsecure(),
+	//	grpc.WithUnaryInterceptor(userServiceInterceptor.Unary()),
+	//	grpc.WithStreamInterceptor(userServiceInterceptor.Stream()),
+	//)
+
 	userServiceDial2, err := grpc.Dial(
-		userServiceAddress,
-		grpc.WithInsecure(),
+		userAddr,
+		grpc.WithAuthority(userServiceAddress),
+		grpc.WithTransportCredentials(cred),
 		grpc.WithUnaryInterceptor(userServiceInterceptor.Unary()),
 		grpc.WithStreamInterceptor(userServiceInterceptor.Stream()),
 	)
