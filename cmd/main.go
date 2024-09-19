@@ -60,12 +60,13 @@ func main() {
 	server.Routes(e, handlers)
 
 	env := config.Viper.GetString("APP_ENV")
-	port := "8080"
+	port := ""
 
 	if env == "production" {
 		log.Println("Running in production mode")
 		port = config.Viper.GetString("PORT")
 	} else {
+		port = config.Viper.GetString("PORT")
 		log.Println("Running in development mode")
 	}
 
