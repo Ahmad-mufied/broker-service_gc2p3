@@ -1,6 +1,6 @@
 syntax = "proto3";
 package auth;
-option go_package = "github.com/Ahmad-mufied/broker-service_gc2p3/pb";
+option go_package = "user-service_gc2p3/pb";
 
 message LoginUserRequest {
   string username = 1;
@@ -31,35 +31,10 @@ message GetUserByIdResponse {
   string username = 1;
 }
 
-message GetUserByUsernameRequest {
-  string username = 1;
-}
-
-message GetUserByUsernameResponse {
-  string user_id = 1;
-}
-
-message CheckUserIsExistRequest {
-  string id = 1;
-}
-
-message CheckUserIsExistResponse {
-  bool is_exist = 1;
-}
-
-message CheckUserIsExistByUsernameRequest {
-  string username = 1;
-}
-
-message CheckUserIsExistByUsernameResponse {
-  bool is_exist = 1;
-}
 
 service AuthUserService {
   rpc Login(LoginUserRequest) returns (LoginUserResponse);
   rpc Register(RegisterUserRequest) returns (RegisterUserResponse);
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
-  rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserByUsernameResponse);
-  rpc CheckUserIsExist(CheckUserIsExistRequest) returns (CheckUserIsExistResponse);
-  rpc CheckUserIsExistByUsername(CheckUserIsExistByUsernameRequest) returns (CheckUserIsExistByUsernameResponse);
 }
+

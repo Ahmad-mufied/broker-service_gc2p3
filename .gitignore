@@ -1,4 +1,4 @@
 tmp
 .idea
-.env
+.env.development
 .task

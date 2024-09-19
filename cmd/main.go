@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Ahmad-mufied/broker-service_gc2p3/config"
-	"github.com/Ahmad-mufied/broker-service_gc2p3/gRPC/clientAuth"
+	"github.com/Ahmad-mufied/broker-service_gc2p3/gRPC/client"
 	"github.com/Ahmad-mufied/broker-service_gc2p3/pb"
+	"github.com/Ahmad-mufied/broker-service_gc2p3/server"
 	"github.com/Ahmad-mufied/broker-service_gc2p3/server/handler"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -14,26 +16,27 @@ import (
 func main() {
 	config.InitViper()
 	config.InitValidator()
+	userServiceAddress := config.Viper.GetString("USER_SERVICE_ADDRESS")
+	bookServiceAddress := config.Viper.GetString("BOOK_SERVICE_ADDRESS")
 
-	serverAddress := "localhost:50051"
-	log.Println("Server running on port :50001")
-
-	cc1, err := grpc.Dial(serverAddress, grpc.WithInsecure())
+	userServiceDial, err := grpc.Dial(userServiceAddress, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	bookServiceDial, err := grpc.Dial(bookServiceAddress, grpc.WithInsecure())
 
 	userServicePassword := config.Viper.GetString("USER_SERVICE_PASSWORD")
-	refreshDuration := config.Viper.GetDuration("REFRESH_DURATION")
+	refreshDuration := config.Viper.GetDuration("USER_SERVICE_REFRESH_DURATION")
 
-	userServiceAuth := clientAuth.NewAuthClient(cc1, config.Viper.GetString("USER_SERVICE_NAME"), userServicePassword)
-	userServiceInterceptor, err := clientAuth.NewAuthInterceptor(userServiceAuth, clientAuth.AuthMethods(), refreshDuration)
+	userServiceAuth := client.NewAuthClient(userServiceDial, config.Viper.GetString("USER_SERVICE_NAME"), userServicePassword)
+	userServiceInterceptor, err := client.NewAuthInterceptor(userServiceAuth, client.AuthMethods(), refreshDuration)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cc2, err := grpc.Dial(
-		serverAddress,
+	userServiceDial2, err := grpc.Dial(
+		userServiceAddress,
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(userServiceInterceptor.Unary()),
 		grpc.WithStreamInterceptor(userServiceInterceptor.Stream()),
@@ -43,17 +46,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	userServiceClient := pb.NewAuthUserServiceClient(cc2)
+	userServiceClient := pb.NewAuthUserServiceClient(userServiceDial2)
 	userHandler := handler.NewUserHandler(userServiceClient)
+
+	bookServiceClient := pb.NewBookServiceClient(bookServiceDial)
+	bookHandler := handler.NewBookHandler(bookServiceClient)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.POST("/register", userHandler.Register)
-	err = e.Start(":8080")
-	if err != nil {
-		e.Logger.Fatal(err)
+	handlers := server.NewHandlers(userHandler, bookHandler)
+	server.Routes(e, handlers)
+
+	env := config.Viper.GetString("APP_ENV")
+	port := "8080"
+
+	if env == "production" {
+		log.Println("Running in production mode")
+		port = config.Viper.GetString("PORT")
+	} else {
+		log.Println("Running in development mode")
 	}
+
+	e.Logger.Fatal(e.Start(fmt.Sprintf("0.0.0.0:%s", port)))
 
 }

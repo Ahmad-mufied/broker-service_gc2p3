@@ -1,4 +1,4 @@
-package clientAuth
+package client
 
 import (
 	"context"
@@ -20,6 +20,7 @@ func NewAuthClient(cc *grpc.ClientConn, serviceName, password string) *AuthClien
 }
 
 func (client *AuthClient) Login() (string, error) {
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -28,13 +29,11 @@ func (client *AuthClient) Login() (string, error) {
 		Password:    client.password,
 	}
 
-	log.Println(req)
 	res, err := client.service.Login(ctx, req)
 	if err != nil {
+		log.Println("Error logging in")
 		return "", err
 	}
-
-	log.Println(res.GetAccessToken())
 
 	return res.GetAccessToken(), nil
 }

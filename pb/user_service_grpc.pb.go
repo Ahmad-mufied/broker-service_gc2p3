@@ -19,12 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthUserService_Login_FullMethodName                      = "/clientAuth.AuthUserService/Login"
-	AuthUserService_Register_FullMethodName                   = "/clientAuth.AuthUserService/Register"
-	AuthUserService_GetUserById_FullMethodName                = "/clientAuth.AuthUserService/GetUserById"
-	AuthUserService_GetUserByUsername_FullMethodName          = "/clientAuth.AuthUserService/GetUserByUsername"
-	AuthUserService_CheckUserIsExist_FullMethodName           = "/clientAuth.AuthUserService/CheckUserIsExist"
-	AuthUserService_CheckUserIsExistByUsername_FullMethodName = "/clientAuth.AuthUserService/CheckUserIsExistByUsername"
+	AuthUserService_Login_FullMethodName       = "/auth.AuthUserService/Login"
+	AuthUserService_Register_FullMethodName    = "/auth.AuthUserService/Register"
+	AuthUserService_GetUserById_FullMethodName = "/auth.AuthUserService/GetUserById"
 )
 
 // AuthUserServiceClient is the client API for AuthUserService service.
@@ -34,9 +31,6 @@ type AuthUserServiceClient interface {
 	Login(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
 	Register(ctx context.Context, in *RegisterUserRequest, opts ...grpc.CallOption) (*RegisterUserResponse, error)
 	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error)
-	GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*GetUserByUsernameResponse, error)
-	CheckUserIsExist(ctx context.Context, in *CheckUserIsExistRequest, opts ...grpc.CallOption) (*CheckUserIsExistResponse, error)
-	CheckUserIsExistByUsername(ctx context.Context, in *CheckUserIsExistByUsernameRequest, opts ...grpc.CallOption) (*CheckUserIsExistByUsernameResponse, error)
 }
 
 type authUserServiceClient struct {
@@ -77,36 +71,6 @@ func (c *authUserServiceClient) GetUserById(ctx context.Context, in *GetUserById
 	return out, nil
 }
 
-func (c *authUserServiceClient) GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*GetUserByUsernameResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserByUsernameResponse)
-	err := c.cc.Invoke(ctx, AuthUserService_GetUserByUsername_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authUserServiceClient) CheckUserIsExist(ctx context.Context, in *CheckUserIsExistRequest, opts ...grpc.CallOption) (*CheckUserIsExistResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CheckUserIsExistResponse)
-	err := c.cc.Invoke(ctx, AuthUserService_CheckUserIsExist_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authUserServiceClient) CheckUserIsExistByUsername(ctx context.Context, in *CheckUserIsExistByUsernameRequest, opts ...grpc.CallOption) (*CheckUserIsExistByUsernameResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CheckUserIsExistByUsernameResponse)
-	err := c.cc.Invoke(ctx, AuthUserService_CheckUserIsExistByUsername_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AuthUserServiceServer is the server API for AuthUserService service.
 // All implementations should embed UnimplementedAuthUserServiceServer
 // for forward compatibility.
@@ -114,9 +78,6 @@ type AuthUserServiceServer interface {
 	Login(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
 	Register(context.Context, *RegisterUserRequest) (*RegisterUserResponse, error)
 	GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error)
-	GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*GetUserByUsernameResponse, error)
-	CheckUserIsExist(context.Context, *CheckUserIsExistRequest) (*CheckUserIsExistResponse, error)
-	CheckUserIsExistByUsername(context.Context, *CheckUserIsExistByUsernameRequest) (*CheckUserIsExistByUsernameResponse, error)
 }
 
 // UnimplementedAuthUserServiceServer should be embedded to have
@@ -134,15 +95,6 @@ func (UnimplementedAuthUserServiceServer) Register(context.Context, *RegisterUse
 }
 func (UnimplementedAuthUserServiceServer) GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserById not implemented")
-}
-func (UnimplementedAuthUserServiceServer) GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*GetUserByUsernameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserByUsername not implemented")
-}
-func (UnimplementedAuthUserServiceServer) CheckUserIsExist(context.Context, *CheckUserIsExistRequest) (*CheckUserIsExistResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckUserIsExist not implemented")
-}
-func (UnimplementedAuthUserServiceServer) CheckUserIsExistByUsername(context.Context, *CheckUserIsExistByUsernameRequest) (*CheckUserIsExistByUsernameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckUserIsExistByUsername not implemented")
 }
 func (UnimplementedAuthUserServiceServer) testEmbeddedByValue() {}
 
@@ -218,65 +170,11 @@ func _AuthUserService_GetUserById_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthUserService_GetUserByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserByUsernameRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthUserServiceServer).GetUserByUsername(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthUserService_GetUserByUsername_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthUserServiceServer).GetUserByUsername(ctx, req.(*GetUserByUsernameRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthUserService_CheckUserIsExist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckUserIsExistRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthUserServiceServer).CheckUserIsExist(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthUserService_CheckUserIsExist_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthUserServiceServer).CheckUserIsExist(ctx, req.(*CheckUserIsExistRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthUserService_CheckUserIsExistByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckUserIsExistByUsernameRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthUserServiceServer).CheckUserIsExistByUsername(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthUserService_CheckUserIsExistByUsername_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthUserServiceServer).CheckUserIsExistByUsername(ctx, req.(*CheckUserIsExistByUsernameRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // AuthUserService_ServiceDesc is the grpc.ServiceDesc for AuthUserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthUserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "clientAuth.AuthUserService",
+	ServiceName: "auth.AuthUserService",
 	HandlerType: (*AuthUserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -290,18 +188,6 @@ var AuthUserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserById",
 			Handler:    _AuthUserService_GetUserById_Handler,
-		},
-		{
-			MethodName: "GetUserByUsername",
-			Handler:    _AuthUserService_GetUserByUsername_Handler,
-		},
-		{
-			MethodName: "CheckUserIsExist",
-			Handler:    _AuthUserService_CheckUserIsExist_Handler,
-		},
-		{
-			MethodName: "CheckUserIsExistByUsername",
-			Handler:    _AuthUserService_CheckUserIsExistByUsername_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

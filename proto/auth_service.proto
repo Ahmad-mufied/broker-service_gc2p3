@@ -1,6 +1,6 @@
 syntax = "proto3";
 package auth;
-option go_package = "github.com/Ahmad-mufied/broker-service_gc2p3/pb";
+option go_package = "user-service_gc2p3/pb";
 
 message LoginServiceRequest {
   string service_name = 1;

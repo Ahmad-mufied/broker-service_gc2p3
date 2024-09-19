@@ -66,20 +66,6 @@ func (h *UserHandler) Login(c echo.Context) error {
 		return utils.HandleValidationError(c, errors)
 	}
 
-	// Check if username is exist
-	isExistReq := pb.CheckUserIsExistByUsernameRequest{
-		Username: user.Username,
-	}
-
-	checkUser, err := h.UserGrpc.CheckUserIsExistByUsername(c.Request().Context(), &isExistReq)
-	if err != nil {
-		return utils.HandleError(c, constans.ErrInternalServerError, err.Error())
-	}
-
-	if !checkUser.GetIsExist() {
-		return utils.HandleError(c, constans.ErrNotFound, "User Not Found")
-	}
-
 	req := pb.LoginUserRequest{
 		Username: user.Username,
 		Password: user.Password,
